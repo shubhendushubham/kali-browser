@@ -1,0 +1,20 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+.search-container {
+    text-align: center;
+}
+.search-box {
+    width: 300px;
+    padding: 10px;
+    font-size: 16px;
+}
+.search-box::placeholder {
+    color: #aaa;
+}
