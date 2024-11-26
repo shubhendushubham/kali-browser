@@ -18,15 +18,18 @@ def fetch_kql_query(query_name):
     except requests.exceptions.RequestException as e:
         return None
 
-# Function to convert natural language to KQL using OpenAI GPT-3
+# Function to convert natural language to KQL using OpenAI GPT-3.5-turbo
 def natural_language_to_kql(natural_language):
     try:
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=f"Convert the following natural language to KQL:\n\n{natural_language}",
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": natural_language}
+            ],
             max_tokens=150
         )
-        kql_query = response.choices[0].text.strip()
+        kql_query = response.choices[0].message["content"].strip()
         return kql_query
     except Exception as e:
         return f"Error converting to KQL: {e}"
