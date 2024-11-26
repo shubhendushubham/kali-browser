@@ -62,7 +62,3 @@ if st.button("Convert to KQL"):
             st.error(converted_kql)
     else:
         st.error("Please provide all inputs.")
-
-# Run the Streamlit app
-if __name__ == "__main__":
-    st.run()
