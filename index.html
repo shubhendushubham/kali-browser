@@ -11,6 +11,28 @@
     <script>
         async function fetchKQLResults() {
             const query = document.getElementById('searchQuery').value;
+            const githubRepo = 'YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME';
+            const githubToken = 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN';
+            
+            const response = await fetch(`https://api.github.com/search/code?q=${query}+in:file+repo:${githubRepo}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `token ${githubToken}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const results = data.items.map(item => item.path).join('\n');
+                document.getElementById('results').innerText = results;
+            } else {
+                document.getElementById('results').innerText = 'Error fetching results';
+            }
+        }
+
+        async function chatWithOpenAI() {
+            const query = document.getElementById('searchQuery').value;
             const response = await fetch('https://api.openai.com/v1/engines/davinci-codex/completions', {
                 method: 'POST',
                 headers: {
