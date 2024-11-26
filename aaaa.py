@@ -25,7 +25,7 @@ def natural_language_to_kql(natural_language):
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": natural_language}
+                {"role": "user", "content": f"Convert the following natural language to KQL:\n\n{natural_language}"}
             ],
             max_tokens=150
         )
