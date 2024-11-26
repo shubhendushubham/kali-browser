@@ -6,14 +6,17 @@ import os
 # Set your OpenAI API key
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
+# Hardcoded GitHub repository URL
+REPO_URL = 'https://raw.githubusercontent.com/your_username/your_repo/main/kql_queries/'
+
 # Function to fetch KQL queries from a GitHub repository
-def fetch_kql_query(repo_url, query_name):
+def fetch_kql_query(query_name):
     try:
-        response = requests.get(f"{repo_url}/{query_name}.kql")
+        response = requests.get(f"{REPO_URL}{query_name}.kql")
         response.raise_for_status()
         return response.text
     except requests.exceptions.RequestException as e:
-        return f"Error fetching query: {e}"
+        return None
 
 # Function to convert natural language to KQL using OpenAI GPT-3
 def natural_language_to_kql(natural_language):
@@ -31,34 +34,26 @@ def natural_language_to_kql(natural_language):
 # Streamlit web application
 st.title("Natural Language to KQL Converter")
 
-# Input fields for user inputs
-repo_url = st.text_input("Enter the GitHub repository URL containing KQL queries:")
-query_name = st.text_input("Enter the name of the KQL query file (without extension):")
+# Input field for natural language query
 natural_language = st.text_area("Enter your query in natural language:")
 
-# Button to trigger the conversion process
 if st.button("Convert to KQL"):
-    if repo_url and query_name and natural_language:
-        # Fetch the KQL query from GitHub
-        kql_query = fetch_kql_query(repo_url, query_name)
-        if "Error" not in kql_query:
-            st.subheader("Fetched KQL Query from GitHub:")
-            st.code(kql_query, language='kql')
-        else:
-            st.error(kql_query)
-        
+    if natural_language:
         # Convert the natural language query to KQL
         converted_kql = natural_language_to_kql(natural_language)
         if "Error" not in converted_kql:
             st.subheader("Converted KQL Query:")
             st.code(converted_kql, language='kql')
             
-            # Option to save the converted KQL query
-            if st.button("Save Converted KQL Query"):
-                with open(f"{query_name}_converted.kql", "w") as file:
-                    file.write(converted_kql)
-                st.success(f"Converted KQL query saved as {query_name}_converted.kql")
+            # Check if the converted KQL query exists in the GitHub repository
+            kql_query = fetch_kql_query(converted_kql)
+            if kql_query:
+                st.subheader("Fetched KQL Query from GitHub:")
+                st.code(kql_query, language='kql')
+            else:
+                st.warning("KQL query not found in the specified GitHub repository.")
+                st.text_area("Submit your KQL query:", value=converted_kql, height=200)
         else:
             st.error(converted_kql)
     else:
-        st.error("Please provide all inputs.")
+        st.error("Please enter a query in natural language.")
