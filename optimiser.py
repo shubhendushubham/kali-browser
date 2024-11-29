@@ -5,25 +5,25 @@ import seaborn as sns
 
 # Define the FirewallRule class
 class FirewallRule:
-    def __init__(self, rule_id, protocol, src_ip, dest_ip, src_port, dest_port, action):
+    def __init__(self, rule_id, protocol, src_network, dest_network, src_port, dest_port, action):
         self.rule_id = rule_id
         self.protocol = protocol
-        self.src_ip = src_ip
-        self.dest_ip = dest_ip
+        self.src_network = src_network
+        self.dest_network = dest_network
         self.src_port = src_port
         self.dest_port = dest_port
         self.action = action
 
     def __repr__(self):
-        return f"Rule({self.rule_id}, {self.protocol}, {self.src_ip}, {self.dest_ip}, {self.src_port}, {self.dest_port}, {self.action})"
+        return f"Rule({self.rule_id}, {self.protocol}, {self.src_network}, {self.dest_network}, {self.src_port}, {self.dest_port}, {self.action})"
 
 # Function to detect conflicts
 def detect_conflicts(rules):
     conflicts = []
     for i in range(len(rules)):
         for j in range(i + 1, len(rules)):
-            if (rules[i].src_ip == rules[j].src_ip and
-                rules[i].dest_ip == rules[j].dest_ip and
+            if (rules[i].src_network == rules[j].src_network and
+                rules[i].dest_network == rules[j].dest_network and
                 rules[i].protocol == rules[j].protocol and
                 rules[i].src_port == rules[j].src_port and
                 rules[i].dest_port == rules[j].dest_port and
@@ -36,7 +36,7 @@ def optimize_rules(rules):
     optimized_rules = []
     seen = set()
     for rule in rules:
-        rule_tuple = (rule.protocol, rule.src_ip, rule.dest_ip, rule.src_port, rule.dest_port, rule.action)
+        rule_tuple = (rule.protocol, rule.src_network, rule.dest_network, rule.src_port, rule.dest_port, rule.action)
         if rule_tuple not in seen:
             seen.add(rule_tuple)
             optimized_rules.append(rule)
@@ -50,9 +50,9 @@ if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
     
     # Check if required columns are present
-    required_columns = ['rule_id', 'protocol', 'src_ip', 'dest_ip', 'src_port', 'dest_port', 'action']
+    required_columns = ['rule_id', 'protocol', 'src_network', 'dest_network', 'src_port', 'dest_port', 'action']
     if all(column in df.columns for column in required_columns):
-        rules = [FirewallRule(row['rule_id'], row['protocol'], row['src_ip'], row['dest_ip'], row['src_port'], row['dest_port'], row['action']) for index, row in df.iterrows()]
+        rules = [FirewallRule(row['rule_id'], row['protocol'], row['src_network'], row['dest_network'], row['src_port'], row['dest_port'], row['action']) for index, row in df.iterrows()]
         st.write("Uploaded Firewall Rules:")
         st.write(df)
 
