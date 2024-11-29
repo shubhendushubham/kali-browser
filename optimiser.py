@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import json
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -45,9 +46,18 @@ def optimize_rules(rules):
 # Streamlit app
 st.title("Firewall Policy Optimizer")
 
-uploaded_file = st.file_uploader("Upload Firewall Rules", type=["csv"])
+uploaded_file = st.file_uploader("Upload Firewall Rules", type=["csv", "json"])
 if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
+    file_type = uploaded_file.name.split('.')[-1]
+    
+    if file_type == 'csv':
+        df = pd.read_csv(uploaded_file)
+    elif file_type == 'json':
+        data = json.load(uploaded_file)
+        df = pd.json_normalize(data)
+    else:
+        st.error("Unsupported file format. Please upload a CSV or JSON file.")
+        st.stop()
     
     # Check if required columns are present
     required_columns = ['rule_id', 'protocol', 'src_network', 'dest_network', 'src_port', 'dest_port', 'action']
@@ -86,8 +96,11 @@ if uploaded_file is not None:
 
         # Graph options
         st.write("Firewall Rules Visualization:")
-        fig, ax = plt.subplots()
-        sns.countplot(data=filtered_df, x='protocol', hue='action', ax=ax)
-        st.pyplot(fig)
+        if not filtered_df.empty:
+            fig, ax = plt.subplots()
+            sns.countplot(data=filtered_df, x='protocol', hue='action', ax=ax)
+            st.pyplot(fig)
+        else:
+            st.write("No data available for the selected filters.")
     else:
-        st.error(f"CSV file is missing one or more required columns: {', '.join(required_columns)}")
+        st.error(f"File is missing one or more required columns: {', '.join(required_columns)}")
