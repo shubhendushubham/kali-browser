@@ -7,19 +7,20 @@ def yara_to_kql(yara_rule):
     try:
         rules = yara.compile(source=yara_rule)
         for rule in rules.rules:
+            conditions = []
             for string in rule.strings:
-                if string[1].startswith('$'):
-                    kql_query += f"| where Message contains '{string[2]}'\n"
+                conditions.append(f"Message contains '{string[2]}'")
+            kql_query = " | ".join(conditions)
     except yara.SyntaxError as e:
         st.error(f"YARA Syntax Error: {e}")
-    return kql_query.strip()
+    return kql_query
 
 def kql_to_yara(kql_query):
     yara_rule = "rule ConvertedRule {\n"
     yara_rule += "    meta:\n"
     yara_rule += "        description = \"Converted from KQL\"\n"
     yara_rule += "    strings:\n"
-    for line in kql_query.split('\n'):
+    for line in kql_query.split('|'):
         if "contains" in line:
             value = line.split("'")[1]
             yara_rule += f"        $a = \"{value}\"\n"
