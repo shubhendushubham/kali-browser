@@ -1,0 +1,62 @@
+import streamlit as st
+import yara
+import pandas as pd
+
+def yara_to_kql(yara_rule):
+    # Enhanced function for converting YARA to KQL
+    kql_query = "Converted KQL query from YARA"
+    # Add logic to parse and convert YARA rules to KQL
+    return kql_query
+
+def kql_to_yara(kql_query):
+    # Enhanced function for converting KQL to YARA
+    yara_rule = "Converted YARA rule from KQL"
+    # Add logic to parse and convert KQL queries to YARA rules
+    return yara_rule
+
+def validate_yara(yara_rule):
+    try:
+        yara.compile(source=yara_rule)
+        return True
+    except yara.SyntaxError:
+        return False
+
+def validate_kql(kql_query):
+    # Placeholder validation for KQL
+    # Implement actual validation logic for KQL queries
+    return True
+
+def main():
+    st.title("YARA and KQL Converter")
+    
+    option = st.selectbox("Choose Conversion Type", ("YARA to KQL", "KQL to YARA"))
+    
+    uploaded_file = st.file_uploader("Upload File", type=["yar", "yara", "kql"])
+    
+    if uploaded_file is not None:
+        file_content = uploaded_file.read().decode("utf-8")
+        st.code(file_content, language='yaml' if option == "YARA to KQL" else 'sql')
+        
+        if option == "YARA to KQL":
+            if validate_yara(file_content):
+                try:
+                    converted_query = yara_to_kql(file_content)
+                    st.subheader("Converted KQL Query")
+                    st.code(converted_query, language='sql')
+                except Exception as e:
+                    st.error(f"Error during conversion: {e}")
+            else:
+                st.error("Invalid YARA rule.")
+        else:
+            if validate_kql(file_content):
+                try:
+                    converted_rule = kql_to_yara(file_content)
+                    st.subheader("Converted YARA Rule")
+                    st.code(converted_rule, language='yaml')
+                except Exception as e:
+                    st.error(f"Error during conversion: {e}")
+            else:
+                st.error("Invalid KQL query.")
+
+if __name__ == "__main__":
+    main()
