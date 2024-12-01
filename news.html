@@ -1,0 +1,48 @@
+{% layout default %}
+<h1>Cybersecurity News</h1>
+<div class="filters">
+  <label for="filter-date">Filter by Date:</label>
+  <input type="date" id="filter-date" />
+  <label for="filter-type">Filter by Type:</label>
+  <select id="filter-type">
+    <option value="">All</option>
+    <option value="https://example.com/rss1">Source 1</option>
+    <option value="https://example.com/rss2">Source 2</option>
+    <option value="https://example.com/rss3">Source 3</option>
+  </select>
+</div>
+<div class="news-container">
+  {% for article in site.data.news %}
+    <div class="news-item" data-date="{{ article.pubDate | date: '%Y-%m-%d' }}" data-source="{{ article.source }}">
+      <a href="{{ article.link }}" target="_blank">{{ article.title }}</a>
+      <p>{{ article.description }}</p>
+      <p>{{ article.pubDate | date: '%Y-%m-%d' }}</p>
+    </div>
+  {% endfor %}
+</div>
+
+<script>
+  document.getElementById('filter-date').addEventListener('input', function() {
+    const filterDate = this.value;
+    const articles = document.querySelectorAll('.news-item');
+    articles.forEach(article => {
+      if (article.dataset.date === filterDate || !filterDate) {
+        article.style.display = 'block';
+      } else {
+        article.style.display = 'none';
+      }
+    });
+  });
+
+  document.getElementById('filter-type').addEventListener('change', function() {
+    const filterType = this.value;
+    const articles = document.querySelectorAll('.news-item');
+    articles.forEach(article => {
+      if (article.dataset.source === filterType || !filterType) {
+        article.style.display = 'block';
+      } else {
+        article.style.display = 'none';
+      }
+    });
+  });
+</script>
