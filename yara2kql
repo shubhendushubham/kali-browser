@@ -4,14 +4,30 @@ import pandas as pd
 
 def yara_to_kql(yara_rule):
     # Enhanced function for converting YARA to KQL
-    kql_query = "Converted KQL query from YARA"
-    # Add logic to parse and convert YARA rules to KQL
-    return kql_query
+    kql_query = ""
+    try:
+        rules = yara.compile(source=yara_rule)
+        for rule in rules:
+            for string in rule.strings:
+                if string[1].startswith('$'):
+                    kql_query += f"| where Message contains '{string[2]}'\n"
+    except yara.SyntaxError as e:
+        st.error(f"YARA Syntax Error: {e}")
+    return kql_query.strip()
 
 def kql_to_yara(kql_query):
     # Enhanced function for converting KQL to YARA
-    yara_rule = "Converted YARA rule from KQL"
-    # Add logic to parse and convert KQL queries to YARA rules
+    yara_rule = "rule ConvertedRule {\n"
+    yara_rule += "    meta:\n"
+    yara_rule += "        description = \"Converted from KQL\"\n"
+    yara_rule += "    strings:\n"
+    for line in kql_query.split('\n'):
+        if "contains" in line:
+            value = line.split("'")[1]
+            yara_rule += f"        $a = \"{value}\"\n"
+    yara_rule += "    condition:\n"
+    yara_rule += "        any of them\n"
+    yara_rule += "}"
     return yara_rule
 
 def validate_yara(yara_rule):
@@ -24,7 +40,7 @@ def validate_yara(yara_rule):
 def validate_kql(kql_query):
     # Placeholder validation for KQL
     # Implement actual validation logic for KQL queries
-    return True
+    return "contains" in kql_query
 
 def main():
     st.title("YARA and KQL Converter")
