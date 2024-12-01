@@ -3,11 +3,10 @@ import yara
 import pandas as pd
 
 def yara_to_kql(yara_rule):
-    # Enhanced function for converting YARA to KQL
     kql_query = ""
     try:
         rules = yara.compile(source=yara_rule)
-        for rule in rules:
+        for rule in rules.rules:
             for string in rule.strings:
                 if string[1].startswith('$'):
                     kql_query += f"| where Message contains '{string[2]}'\n"
@@ -16,7 +15,6 @@ def yara_to_kql(yara_rule):
     return kql_query.strip()
 
 def kql_to_yara(kql_query):
-    # Enhanced function for converting KQL to YARA
     yara_rule = "rule ConvertedRule {\n"
     yara_rule += "    meta:\n"
     yara_rule += "        description = \"Converted from KQL\"\n"
@@ -38,8 +36,6 @@ def validate_yara(yara_rule):
         return False
 
 def validate_kql(kql_query):
-    # Placeholder validation for KQL
-    # Implement actual validation logic for KQL queries
     return "contains" in kql_query
 
 def main():
