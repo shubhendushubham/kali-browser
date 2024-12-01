@@ -1,6 +1,5 @@
 import streamlit as st
 import yara
-import pandas as pd
 
 def yara_to_kql(yara_rule):
     kql_query = ""
@@ -15,20 +14,6 @@ def yara_to_kql(yara_rule):
         st.error(f"YARA Syntax Error: {e}")
     return kql_query
 
-def kql_to_yara(kql_query):
-    yara_rule = "rule ConvertedRule {\n"
-    yara_rule += "    meta:\n"
-    yara_rule += "        description = \"Converted from KQL\"\n"
-    yara_rule += "    strings:\n"
-    for line in kql_query.split('|'):
-        if "contains" in line:
-            value = line.split("'")[1]
-            yara_rule += f"        $a = \"{value}\"\n"
-    yara_rule += "    condition:\n"
-    yara_rule += "        any of them\n"
-    yara_rule += "}"
-    return yara_rule
-
 def validate_yara(yara_rule):
     try:
         yara.compile(source=yara_rule)
@@ -36,40 +21,24 @@ def validate_yara(yara_rule):
     except yara.SyntaxError:
         return False
 
-def validate_kql(kql_query):
-    return "contains" in kql_query
-
 def main():
-    st.title("YARA and KQL Converter")
+    st.title("YARA to KQL Converter")
     
-    option = st.selectbox("Choose Conversion Type", ("YARA to KQL", "KQL to YARA"))
-    
-    uploaded_file = st.file_uploader("Upload File", type=["yar", "yara", "kql"])
+    uploaded_file = st.file_uploader("Upload YARA Rule File", type=["yar", "yara"])
     
     if uploaded_file is not None:
-        file_content = uploaded_file.read().decode("utf-8")
-        st.code(file_content, language='yaml' if option == "YARA to KQL" else 'sql')
+        yara_rules = uploaded_file.read().decode("utf-8")
+        st.code(yara_rules, language='yaml')
         
-        if option == "YARA to KQL":
-            if validate_yara(file_content):
-                try:
-                    converted_query = yara_to_kql(file_content)
-                    st.subheader("Converted KQL Query")
-                    st.code(converted_query, language='sql')
-                except Exception as e:
-                    st.error(f"Error during conversion: {e}")
-            else:
-                st.error("Invalid YARA rule.")
+        if validate_yara(yara_rules):
+            try:
+                kql_query = yara_to_kql(yara_rules)
+                st.subheader("Converted KQL Query")
+                st.code(kql_query, language='sql')
+            except Exception as e:
+                st.error(f"Error during conversion: {e}")
         else:
-            if validate_kql(file_content):
-                try:
-                    converted_rule = kql_to_yara(file_content)
-                    st.subheader("Converted YARA Rule")
-                    st.code(converted_rule, language='yaml')
-                except Exception as e:
-                    st.error(f"Error during conversion: {e}")
-            else:
-                st.error("Invalid KQL query.")
+            st.error("Invalid YARA rule.")
 
 if __name__ == "__main__":
     main()
