@@ -1,0 +1,63 @@
+import streamlit as st
+import requests
+import pandas as pd
+import plotly.express as px
+from datetime import datetime
+
+# Function to fetch CVE data
+def fetch_cve_data():
+    try:
+        url = "https://cve.circl.lu/api/last"
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for bad status codes
+        data = response.json()
+        return pd.DataFrame(data)
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching CVE data: {e}")
+        return pd.DataFrame()
+
+# Function to fetch CVSS data
+def fetch_cvss_data(cve_id):
+    try:
+        url = f"https://www.first.org/cvss/calculator/cvss3/{cve_id}"
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for bad status codes
+        data = response.json()
+        return data
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching CVSS data: {e}")
+        return {}
+
+# Streamlit app
+st.set_page_config(page_title="CVE Dashboard", layout="wide")
+
+st.title("Real-time CVE Dashboard")
+
+# Auto-refresh every 5 minutes
+st_autorefresh = st.experimental_rerun(interval=300000)
+
+# Fetch data
+cve_data = fetch_cve_data()
+
+if not cve_data.empty:
+    # Display data
+    st.subheader("Latest CVEs")
+    st.dataframe(cve_data)
+
+    # Select CVE ID
+    cve_id = st.selectbox("Select CVE ID", cve_data['id'])
+
+    # Fetch and display CVSS data
+    cvss_data = fetch_cvss_data(cve_id)
+    if cvss_data:
+        st.subheader(f"CVSS Details for {cve_id}")
+        st.json(cvss_data)
+
+    # Plotting
+    fig = px.bar(cve_data, x='id', y='cvss', title="CVSS Scores")
+    st.plotly_chart(fig)
+else:
+    st.warning("No CVE data available at the moment.")
+
+# Display last updated time
+st.write(f"Last updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
