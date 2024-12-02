@@ -13,7 +13,7 @@ import threading  # Added for threading
 def fetch_feed(url):
     return feedparser.parse(url)
 
-# Function to update the RSS feeds periodically
+# Function to update the RSS feeds
 def update_feeds():  # New function for periodic updates
     global all_entries
     all_entries = []
@@ -69,6 +69,11 @@ rss_feed_names = [f'Feed {i+1}' for i in range(len(rss_feeds))]
 all_entries = []
 update_feeds()  # Changed to call the new update_feeds function
 
+# Add a refresh button
+if st.button('Refresh News'):  # New refresh button
+    update_feeds()  # Call update_feeds on button click
+    st.success('News articles updated!')  # Display success message
+
 # Sentiment Analysis
 def get_sentiment(text):
     return TextBlob(text).sentiment.polarity
@@ -105,11 +110,4 @@ for i in range(0, len(paginated_df), 2):
                 st.write(f"Sentiment: {'Positive' if row['Sentiment'] > 0 else 'Negative' if row['Sentiment'] < 0 else 'Neutral'}")
                 st.markdown("---")
 
-# Visualization: Number of articles per source
-source_counts = df['Source'].value_counts()
-fig, ax = plt.subplots()
-source_counts.plot(kind='bar', ax=ax)
-ax.set_title('Number of Articles per Source')
-ax.set_xlabel('Source')
-ax.set_ylabel('Number of Articles')
-st.pyplot
+# Visualization: Number
