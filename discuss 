@@ -56,8 +56,45 @@ def main():
             st.write(f"Category: {discussion['category']['name']}")
             st.markdown("---")
 
+    # Embed giscus widget
+    giscus_script = """
+    <script src="https://giscus.app/client.js"
+        data-repo="owner/repo"
+        data-repo-id="repo_id"
+        data-category="Announcements"
+        data-category-id="category_id"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="dark"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+    </script>
+    <noscript>Please enable JavaScript to view the comments powered by giscus.</noscript>
+    """
+    st.components.v1.html(giscus_script, height=600)
+
     # Add dark background color to the UI
     st.markdown(
         """
         <style>
         .stApp {
+            background-color: #2e2e2e;
+            color: #ffffff;
+        }
+        .stSidebar {
+            background-color: #1e1e1e;
+        }
+        .stMarkdown {
+            color: #ffffff;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+if __name__ == "__main__":
+    main()
