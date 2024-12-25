@@ -1,0 +1,78 @@
+import streamlit as st
+import requests
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+TOKEN = os.getenv("GITHUB_API_TOKEN")
+
+# GitHub API endpoint for discussions
+GITHUB_API_URL = "https://api.github.com/graphql"
+
+# GraphQL query to fetch discussions
+query = """
+{
+  repository(owner: "owner", name: "repo") {
+    discussions(first: 10) {
+      nodes {
+        title
+        body
+        category {
+          name
+        }
+      }
+    }
+  }
+}
+"""
+
+headers = {"Authorization": f"Bearer {TOKEN}"}
+
+def fetch_discussions():
+    try:
+        response = requests.post(GITHUB_API_URL, json={'query': query}, headers=headers)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        st.error(f"Error fetching discussions: {e}")
+        return None
+
+def main():
+    st.set_page_config(page_title="GitHub Discussions Chat App", layout="wide")
+    st.title("GitHub Discussions Chat App")
+
+    # Sidebar for navigation and filtering
+    st.sidebar.header("Navigation")
+    st.sidebar.markdown("Use the sidebar to navigate and filter discussions.")
+    
+    # Fetch discussions
+    discussions = fetch_discussions()
+    
+    if discussions:
+        for discussion in discussions['data']['repository']['discussions']['nodes']:
+            st.subheader(discussion['title'])
+            st.write(discussion['body'])
+            st.write(f"Category: {discussion['category']['name']}")
+            st.markdown("---")
+
+    # Add some color to the UI
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background-color: #f0f2f6;
+        }
+        .stSidebar {
+            background-color: #e0e4e8;
+        }
+        .stMarkdown {
+            color: #333;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+if __name__ == "__main__":
+    main()
