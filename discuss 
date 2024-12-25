@@ -56,18 +56,19 @@ def main():
             st.write(f"Category: {discussion['category']['name']}")
             st.markdown("---")
 
-    # Add some color to the UI
+    # Add dark background color to the UI
     st.markdown(
         """
         <style>
         .stApp {
-            background-color: #f0f2f6;
+            background-color: #2e2e2e;
+            color: #ffffff;
         }
         .stSidebar {
-            background-color: #e0e4e8;
+            background-color: #1e1e1e;
         }
         .stMarkdown {
-            color: #333;
+            color: #ffffff;
         }
         </style>
         """,
